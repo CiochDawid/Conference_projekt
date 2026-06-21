@@ -415,6 +415,85 @@ function setupOrganizerCards() {
     });
 }
 
+function setupRevealGroups() {
+    const groups = Array.from(document.querySelectorAll("[data-reveal-group], .reveal-grid, .topic-reveal-grid, .cooperation-reveal-grid"));
+
+    if (groups.length === 0) {
+        return;
+    }
+
+    function closeGroup(group) {
+        const cards = Array.from(group.querySelectorAll(".reveal-card"));
+        group.classList.remove("has-active");
+
+        cards.forEach(function (card) {
+            card.classList.remove("is-active");
+
+            const trigger = card.querySelector(".reveal-trigger");
+
+            if (trigger) {
+                trigger.setAttribute("aria-expanded", "false");
+            }
+        });
+    }
+
+    groups.forEach(function (group) {
+        if (group.dataset.revealInitialized === "true") {
+            return;
+        }
+
+        const cards = Array.from(group.querySelectorAll(".reveal-card"));
+
+        if (cards.length === 0) {
+            return;
+        }
+
+        group.dataset.revealInitialized = "true";
+
+        cards.forEach(function (card) {
+            const trigger = card.querySelector(".reveal-trigger");
+
+            if (!trigger) {
+                return;
+            }
+
+            trigger.addEventListener("click", function (event) {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const wasActive = card.classList.contains("is-active");
+                closeGroup(group);
+
+                if (!wasActive) {
+                    group.classList.add("has-active");
+                    card.classList.add("is-active");
+                    trigger.setAttribute("aria-expanded", "true");
+                }
+            });
+        });
+
+        group.addEventListener("click", function (event) {
+            if (event.target === group) {
+                closeGroup(group);
+            }
+        });
+    });
+
+    document.addEventListener("click", function (event) {
+        groups.forEach(function (group) {
+            if (!group.contains(event.target)) {
+                closeGroup(group);
+            }
+        });
+    });
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Escape") {
+            groups.forEach(closeGroup);
+        }
+    });
+}
+
 function setupEditionGallery() {
     const gallery = document.querySelector(".js-edition-gallery");
 
@@ -559,6 +638,7 @@ window.addEventListener("load", function () {
     setupSmoothSectionLinks();
 
     setupFivePercentSectionAutoAlign();
+    setupRevealGroups();
 
     setupOrganizerCards();
     setupEditionGallery();
