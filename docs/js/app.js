@@ -3,8 +3,6 @@ const navLinks = document.getElementById("nav-links");
 const navItems = document.querySelectorAll(".nav-links a");
 const navDropdownTriggers = document.querySelectorAll(".nav-dropdown-trigger");
 const sections = Array.from(document.querySelectorAll(".page-section"));
-const isEditionOnePage = document.body.classList.contains("edition-one-page");
-let sectionScrollLockUntil = 0;
 
 if (hamburger && navLinks) {
     hamburger.addEventListener("click", function () {
@@ -110,13 +108,9 @@ function setupSmoothSectionLinks() {
 
             event.preventDefault();
 
-            sectionScrollLockUntil = window.performance.now() + 1800;
-
-            const targetTop = targetElement.getBoundingClientRect().top + window.pageYOffset;
-
-            window.scrollTo({
-                top: targetTop,
-                behavior: "smooth"
+            targetElement.scrollIntoView({
+                behavior: "smooth",
+                block: "start"
             });
 
             history.pushState(null, "", linkUrl.hash);
@@ -125,13 +119,7 @@ function setupSmoothSectionLinks() {
 }
 
 function setupFivePercentSectionAutoAlign() {
-    const desktopQuery = window.matchMedia("(min-width: 1101px) and (hover: hover) and (pointer: fine)");
-    const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const alignSections = sections.filter(function (section) {
-        return !section.closest("footer");
-    });
-
-    if (alignSections.length <= 1) {
+    if (sections.length <= 1 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         return;
     }
 
@@ -140,10 +128,6 @@ function setupFivePercentSectionAutoAlign() {
     let previousScrollY = window.scrollY;
     let scrollCheckAnimationFrame = null;
     let userHasStartedScrolling = false;
-
-    function canAutoAlignSections() {
-        return desktopQuery.matches && !reducedMotionQuery.matches;
-    }
 
     function finishAutoAlign(section) {
         lastAlignedSection = section;
@@ -155,45 +139,38 @@ function setupFivePercentSectionAutoAlign() {
     }
 
     function alignSectionToTop(section) {
-        if (!section || isAutoAligning || section === lastAlignedSection || !canAutoAlignSections()) {
+        if (!section || isAutoAligning || section === lastAlignedSection) {
             return;
         }
 
         isAutoAligning = true;
 
-        const sectionTop = section.getBoundingClientRect().top + window.pageYOffset;
-
-        window.scrollTo({
-            top: sectionTop,
-            behavior: "smooth"
+        section.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
         });
 
         finishAutoAlign(section);
     }
 
-    function sectionHasEnteredOnePercentFromBottom(section) {
+    function sectionHasEnteredFivePercentFromBottom(section) {
         const rectangle = section.getBoundingClientRect();
-        const onePercentEnteredLine = window.innerHeight * 0.99;
+        const fivePercentEnteredLine = window.innerHeight * 0.99;
 
-        return rectangle.top > 0 && rectangle.top <= onePercentEnteredLine;
+        return rectangle.top > 0 && rectangle.top <= fivePercentEnteredLine;
     }
 
-    function sectionHasEnteredOnePercentFromTop(section) {
+    function sectionHasEnteredFivePercentFromTop(section) {
         const rectangle = section.getBoundingClientRect();
-        const onePercentVisibleLine = window.innerHeight * 0.01;
+        const fivePercentVisibleLine = window.innerHeight * 0.01;
 
-        return rectangle.top < 0 && rectangle.bottom >= onePercentVisibleLine;
+        return rectangle.top < 0 && rectangle.bottom >= fivePercentVisibleLine;
     }
 
     function checkSectionAlignment() {
         scrollCheckAnimationFrame = null;
 
-        if (isAutoAligning || !userHasStartedScrolling || !canAutoAlignSections()) {
-            return;
-        }
-
-        if (window.performance.now() < sectionScrollLockUntil) {
-            previousScrollY = window.scrollY;
+        if (isAutoAligning || !userHasStartedScrolling) {
             return;
         }
 
@@ -203,10 +180,10 @@ function setupFivePercentSectionAutoAlign() {
         previousScrollY = currentScrollY;
 
         if (scrollingDown) {
-            for (let index = 1; index < alignSections.length; index += 1) {
-                const section = alignSections[index];
+            for (let index = 1; index < sections.length; index += 1) {
+                const section = sections[index];
 
-                if (sectionHasEnteredOnePercentFromBottom(section)) {
+                if (sectionHasEnteredFivePercentFromBottom(section)) {
                     alignSectionToTop(section);
                     break;
                 }
@@ -214,10 +191,10 @@ function setupFivePercentSectionAutoAlign() {
         }
 
         if (scrollingUp) {
-            for (let index = alignSections.length - 2; index >= 0; index -= 1) {
-                const section = alignSections[index];
+            for (let index = sections.length - 2; index >= 0; index -= 1) {
+                const section = sections[index];
 
-                if (sectionHasEnteredOnePercentFromTop(section)) {
+                if (sectionHasEnteredFivePercentFromTop(section)) {
                     alignSectionToTop(section);
                     break;
                 }
@@ -233,21 +210,11 @@ function setupFivePercentSectionAutoAlign() {
         scrollCheckAnimationFrame = window.requestAnimationFrame(checkSectionAlignment);
     }
 
-    ["wheel", "keydown"].forEach(function (eventName) {
+    ["wheel", "touchmove", "keydown"].forEach(function (eventName) {
         window.addEventListener(eventName, function () {
-            if (!canAutoAlignSections()) {
-                return;
-            }
-
             userHasStartedScrolling = true;
             previousScrollY = window.scrollY;
         }, { passive: true });
-    });
-
-    desktopQuery.addEventListener("change", function () {
-        previousScrollY = window.scrollY;
-        userHasStartedScrolling = false;
-        isAutoAligning = false;
     });
 
     window.addEventListener("scroll", requestSectionAlignmentCheck, { passive: true });
@@ -416,7 +383,7 @@ function setupOrganizerCards() {
 }
 
 function setupRevealGroups() {
-    const groups = Array.from(document.querySelectorAll("[data-reveal-group], .reveal-grid, .topic-reveal-grid, .cooperation-reveal-grid"));
+    const groups = Array.from(document.querySelectorAll("[data-reveal-group]"));
 
     if (groups.length === 0) {
         return;
@@ -438,17 +405,12 @@ function setupRevealGroups() {
     }
 
     groups.forEach(function (group) {
-        if (group.dataset.revealInitialized === "true") {
+        if (group.dataset.initialized === "true") {
             return;
         }
 
+        group.dataset.initialized = "true";
         const cards = Array.from(group.querySelectorAll(".reveal-card"));
-
-        if (cards.length === 0) {
-            return;
-        }
-
-        group.dataset.revealInitialized = "true";
 
         cards.forEach(function (card) {
             const trigger = card.querySelector(".reveal-trigger");
@@ -458,7 +420,6 @@ function setupRevealGroups() {
             }
 
             trigger.addEventListener("click", function (event) {
-                event.preventDefault();
                 event.stopPropagation();
 
                 const wasActive = card.classList.contains("is-active");
@@ -639,7 +600,6 @@ window.addEventListener("load", function () {
 
     setupFivePercentSectionAutoAlign();
     setupRevealGroups();
-
     setupOrganizerCards();
     setupEditionGallery();
     updateActiveNavigation();
