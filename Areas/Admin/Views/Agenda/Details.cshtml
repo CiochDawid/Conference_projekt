@@ -1,0 +1,29 @@
+@model Conference_projekt.Models.AgendaItem
+
+@{
+    ViewData["Title"] = "Szczegóły punktu harmonogramu";
+}
+
+<div class="container" style="max-width: 760px; margin: 60px auto;">
+    <h1>Szczegóły punktu harmonogramu</h1>
+
+    <dl>
+        <dt>Tytuł</dt>
+        <dd>@Model.Title</dd>
+
+        <dt>Opis</dt>
+        <dd>@Model.Description</dd>
+
+        <dt>Start</dt>
+        <dd>@Model.StartTime.ToString("yyyy-MM-dd HH:mm")</dd>
+
+        <dt>Koniec</dt>
+        <dd>@Model.EndTime.ToString("yyyy-MM-dd HH:mm")</dd>
+
+        <dt>Miejsce</dt>
+        <dd>@Model.Location</dd>
+    </dl>
+
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edytuj</a>
+    <a asp-action="Index">Powrót</a>
+</div>

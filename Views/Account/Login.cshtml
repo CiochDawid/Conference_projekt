@@ -1,0 +1,40 @@
+@model Conference_projekt.ViewModels.LoginViewModel
+
+@{
+    ViewData["Title"] = "Logowanie administratora";
+}
+
+<div class="container" style="max-width: 520px; margin: 80px auto;">
+    <h1>Logowanie administratora</h1>
+
+    <form asp-action="Login" method="post">
+        <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="Email">E-mail</label>
+            <input asp-for="Email" class="form-control" autocomplete="username" />
+            <span asp-validation-for="Email" class="text-danger"></span>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="Password">Hasło</label>
+            <input asp-for="Password" class="form-control" autocomplete="current-password" />
+            <span asp-validation-for="Password" class="text-danger"></span>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label>
+                <input asp-for="RememberMe" />
+                Zapamiętaj mnie
+            </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Zaloguj</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

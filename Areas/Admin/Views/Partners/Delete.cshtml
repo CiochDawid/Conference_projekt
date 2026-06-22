@@ -1,0 +1,29 @@
+@model Conference_projekt.Models.Partner
+
+@{
+    ViewData["Title"] = "Usuń partnera";
+}
+
+<div class="container" style="max-width: 720px; margin: 60px auto;">
+    <h1>Usuń partnera</h1>
+
+    <p>Czy na pewno chcesz usunąć tego partnera?</p>
+
+    <dl>
+        <dt>Nazwa</dt>
+        <dd>@Model.Name</dd>
+
+        <dt>Strona www</dt>
+        <dd>@Model.WebsiteUrl</dd>
+
+        <dt>Logo</dt>
+        <dd>@Model.LogoPath</dd>
+    </dl>
+
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id">
+        <button type="submit">Usuń</button>
+        <a asp-action="Index">Anuluj</a>
+    </form>
+</div>

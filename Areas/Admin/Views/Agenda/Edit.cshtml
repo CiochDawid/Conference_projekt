@@ -1,0 +1,51 @@
+@model Conference_projekt.Models.AgendaItem
+
+@{
+    ViewData["Title"] = "Edytuj punkt harmonogramu";
+}
+
+<div class="container" style="max-width: 760px; margin: 60px auto;">
+    <h1>Edytuj punkt harmonogramu</h1>
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="Title">Tytuł</label><br>
+            <input asp-for="Title" style="width: 100%; padding: 8px;">
+            <span asp-validation-for="Title" class="text-danger"></span>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="Description">Opis</label><br>
+            <textarea asp-for="Description" rows="4" style="width: 100%; padding: 8px;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="StartTime">Data i godzina rozpoczęcia</label><br>
+            <input asp-for="StartTime" type="datetime-local" style="width: 100%; padding: 8px;">
+            <span asp-validation-for="StartTime" class="text-danger"></span>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="EndTime">Data i godzina zakończenia</label><br>
+            <input asp-for="EndTime" type="datetime-local" style="width: 100%; padding: 8px;">
+            <span asp-validation-for="EndTime" class="text-danger"></span>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="Location">Miejsce</label><br>
+            <input asp-for="Location" style="width: 100%; padding: 8px;">
+        </div>
+
+        <button type="submit">Zapisz zmiany</button>
+        <a asp-action="Index">Anuluj</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

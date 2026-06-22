@@ -1,0 +1,20 @@
+@{
+    ViewData["Title"] = "Panel administratora";
+}
+
+<div class="container" style="max-width: 960px; margin: 60px auto;">
+    <h1>Panel administratora</h1>
+    <p>Jesteś zalogowany jako administrator.</p>
+
+    <ul>
+        <li><a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
+        <li>CRUD partnerów — następny etap</li>
+        <li>CRUD harmonogramu — następny etap</li>
+        <li>Wiadomości kontaktowe — następny etap</li>
+        <li>Zapisy uczestników — następny etap</li>
+    </ul>
+
+    <form asp-area="" asp-controller="Account" asp-action="Logout" method="post">
+        <button type="submit" class="btn btn-secondary">Wyloguj</button>
+    </form>
+</div>

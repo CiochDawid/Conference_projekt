@@ -1,0 +1,49 @@
+@model Conference_projekt.Models.Partner
+
+@{
+    ViewData["Title"] = "Edytuj partnera";
+}
+
+<div class="container" style="max-width: 720px; margin: 60px auto;">
+    <h1>Edytuj partnera</h1>
+
+    <form asp-action="Edit" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id">
+
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="Name">Nazwa</label><br>
+            <input asp-for="Name" style="width: 100%; padding: 8px;">
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="Description">Opis</label><br>
+            <textarea asp-for="Description" rows="4" style="width: 100%; padding: 8px;"></textarea>
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="WebsiteUrl">Strona www</label><br>
+            <input asp-for="WebsiteUrl" style="width: 100%; padding: 8px;">
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="LogoPath">Ścieżka logo</label><br>
+            <input asp-for="LogoPath" style="width: 100%; padding: 8px;">
+        </div>
+
+        <div style="margin-bottom: 16px;">
+            <label asp-for="DisplayOrder">Kolejność</label><br>
+            <input asp-for="DisplayOrder" style="width: 100%; padding: 8px;">
+        </div>
+
+        <button type="submit">Zapisz zmiany</button>
+        <a asp-action="Index">Anuluj</a>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

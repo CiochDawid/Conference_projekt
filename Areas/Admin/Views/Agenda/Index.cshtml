@@ -1,0 +1,44 @@
+@model IEnumerable<Conference_projekt.Models.AgendaItem>
+
+@{
+    ViewData["Title"] = "Harmonogram";
+}
+
+<div class="container" style="max-width: 1100px; margin: 60px auto;">
+    <h1>Harmonogram</h1>
+
+    <p>
+        <a asp-area="Admin" asp-controller="Agenda" asp-action="Create">Dodaj punkt harmonogramu</a>
+        <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Powrót do panelu</a>
+    </p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Start</th>
+                <th>Koniec</th>
+                <th>Tytuł</th>
+                <th>Miejsce</th>
+                <th>Prelegent</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.StartTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@item.EndTime.ToString("yyyy-MM-dd HH:mm")</td>
+                <td>@item.Title</td>
+                <td>@item.Location</td>
+                <td>@item.Speaker?.FullName</td>
+                <td>
+                    <a asp-action="Details" asp-route-id="@item.Id">Szczegóły</a> |
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edytuj</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Usuń</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

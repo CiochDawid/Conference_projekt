@@ -1,0 +1,47 @@
+@model IEnumerable<Conference_projekt.Models.Partner>
+
+@{
+    ViewData["Title"] = "Partnerzy";
+}
+
+<div class="container" style="max-width: 1100px; margin: 60px auto;">
+    <h1>Partnerzy</h1>
+
+    <p>
+        <a class="btn btn-primary" asp-area="Admin" asp-controller="Partners" asp-action="Create">Dodaj partnera</a>
+        <a class="btn btn-secondary" asp-area="Admin" asp-controller="Dashboard" asp-action="Index">Powrót do panelu</a>
+    </p>
+
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Kolejność</th>
+                <th>Nazwa</th>
+                <th>Strona</th>
+                <th>Logo</th>
+                <th>Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.DisplayOrder</td>
+                <td>@item.Name</td>
+                <td>
+                    @if (!string.IsNullOrWhiteSpace(item.WebsiteUrl))
+                    {
+                        <a href="@item.WebsiteUrl" target="_blank" rel="noopener noreferrer">Otwórz</a>
+                    }
+                </td>
+                <td>@item.LogoPath</td>
+                <td>
+                    <a asp-area="Admin" asp-controller="Partners" asp-action="Edit" asp-route-id="@item.Id">Edytuj</a> |
+                    <a asp-area="Admin" asp-controller="Partners" asp-action="Details" asp-route-id="@item.Id">Szczegóły</a> |
+                    <a asp-area="Admin" asp-controller="Partners" asp-action="Delete" asp-route-id="@item.Id">Usuń</a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

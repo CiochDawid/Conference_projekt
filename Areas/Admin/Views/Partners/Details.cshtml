@@ -1,0 +1,29 @@
+@model Conference_projekt.Models.Partner
+
+@{
+    ViewData["Title"] = "Szczegóły partnera";
+}
+
+<div class="container" style="max-width: 720px; margin: 60px auto;">
+    <h1>Szczegóły partnera</h1>
+
+    <dl>
+        <dt>Nazwa</dt>
+        <dd>@Model.Name</dd>
+
+        <dt>Opis</dt>
+        <dd>@Model.Description</dd>
+
+        <dt>Strona www</dt>
+        <dd>@Model.WebsiteUrl</dd>
+
+        <dt>Logo</dt>
+        <dd>@Model.LogoPath</dd>
+
+        <dt>Kolejność</dt>
+        <dd>@Model.DisplayOrder</dd>
+    </dl>
+
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edytuj</a>
+    <a asp-action="Index">Powrót</a>
+</div>

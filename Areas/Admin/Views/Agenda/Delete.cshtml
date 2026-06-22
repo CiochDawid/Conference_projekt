@@ -1,0 +1,32 @@
+@model Conference_projekt.Models.AgendaItem
+
+@{
+    ViewData["Title"] = "Usuń punkt harmonogramu";
+}
+
+<div class="container" style="max-width: 760px; margin: 60px auto;">
+    <h1>Usuń punkt harmonogramu</h1>
+
+    <p>Czy na pewno chcesz usunąć ten punkt harmonogramu?</p>
+
+    <dl>
+        <dt>Tytuł</dt>
+        <dd>@Model.Title</dd>
+
+        <dt>Start</dt>
+        <dd>@Model.StartTime.ToString("yyyy-MM-dd HH:mm")</dd>
+
+        <dt>Koniec</dt>
+        <dd>@Model.EndTime.ToString("yyyy-MM-dd HH:mm")</dd>
+
+        <dt>Miejsce</dt>
+        <dd>@Model.Location</dd>
+    </dl>
+
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id">
+        <button type="submit">Usuń</button>
+        <a asp-action="Index">Anuluj</a>
+    </form>
+</div>
