@@ -355,6 +355,43 @@ function setupRevealGroups() {
     });
 }
 
+
+function syncIdeaTopicBoxHeight() {
+    const ideaSection = document.querySelector(".home-page #idea");
+
+    if (!ideaSection) {
+        return;
+    }
+
+    const leftText = ideaSection.querySelector(".idea-text-box");
+    const topicColumn = ideaSection.querySelector(".idea-topic-column");
+    const topicGrid = ideaSection.querySelector(".idea-topic-grid");
+
+    if (!leftText || !topicColumn || !topicGrid) {
+        return;
+    }
+
+    if (window.innerWidth < 981) {
+        topicColumn.style.removeProperty("--idea-left-height");
+        topicGrid.style.removeProperty("--idea-left-height");
+        topicGrid.classList.remove("is-height-synced");
+        return;
+    }
+
+    const leftHeight = Math.ceil(leftText.getBoundingClientRect().height);
+
+    if (leftHeight > 0) {
+        const cssHeight = leftHeight + "px";
+        topicColumn.style.setProperty("--idea-left-height", cssHeight);
+        topicGrid.style.setProperty("--idea-left-height", cssHeight);
+        topicGrid.classList.add("is-height-synced");
+    }
+}
+
+function scheduleIdeaTopicBoxHeightSync() {
+    window.requestAnimationFrame(syncIdeaTopicBoxHeight);
+}
+
 function setupEditionGallery() {
     const gallery = document.querySelector(".js-edition-gallery");
 
@@ -540,11 +577,19 @@ function initializePageInteractions() {
     setupRevealGroups();
     setupOrganizerCards();
     setupEditionGallery();
+    syncIdeaTopicBoxHeight();
     updateActiveNavigation();
 }
 
 window.addEventListener("scroll", updateActiveNavigation, { passive: true });
 window.addEventListener("resize", updateActiveNavigation);
+window.addEventListener("resize", scheduleIdeaTopicBoxHeightSync);
 
 runWhenDocumentReady(initializePageInteractions);
+window.addEventListener("load", scheduleIdeaTopicBoxHeightSync, { once: true });
+
+if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(scheduleIdeaTopicBoxHeightSync).catch(function () {});
+}
+
 window.addEventListener("load", setupLazyDecorativeLottie, { once: true });
