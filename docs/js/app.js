@@ -3,6 +3,8 @@ const navLinks = document.getElementById("nav-links");
 const navItems = document.querySelectorAll(".nav-links a");
 const navDropdownTriggers = document.querySelectorAll(".nav-dropdown-trigger");
 const sections = Array.from(document.querySelectorAll(".page-section"));
+const isEditionOnePage = document.body.classList.contains("edition-one-page");
+let sectionScrollLockUntil = 0;
 
 if (hamburger && navLinks) {
     hamburger.addEventListener("click", function () {
@@ -65,6 +67,14 @@ function updateActiveNavigation() {
                 trigger.classList.add("active");
             });
         }
+
+        if (window.location.pathname.includes("logo.html") && href === "logo.html") {
+            link.classList.add("active");
+        }
+
+        if (window.location.pathname.includes("zapisy.html") && href === "zapisy.html") {
+            link.classList.add("active");
+        }
     });
 }
 
@@ -77,147 +87,6 @@ function setupReturnToHomeLinks() {
             window.location.href = "index.html#start";
         });
     });
-}
-
-function setupSmoothSectionLinks() {
-    const pageLinks = document.querySelectorAll('a[href*="#"]');
-
-    pageLinks.forEach(function (link) {
-        link.addEventListener("click", function (event) {
-            const rawHref = link.getAttribute("href");
-
-            if (!rawHref || rawHref === "#") {
-                return;
-            }
-
-            if (rawHref === "index.html#start" || rawHref === "./index.html#start") {
-                return;
-            }
-
-            const linkUrl = new URL(rawHref, window.location.href);
-
-            if (linkUrl.pathname !== window.location.pathname) {
-                return;
-            }
-
-            const targetElement = document.querySelector(linkUrl.hash);
-
-            if (!targetElement) {
-                return;
-            }
-
-            event.preventDefault();
-
-            targetElement.scrollIntoView({
-                behavior: "smooth",
-                block: "start"
-            });
-
-            history.pushState(null, "", linkUrl.hash);
-        });
-    });
-}
-
-function setupFivePercentSectionAutoAlign() {
-    if (sections.length <= 1 || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        return;
-    }
-
-    let isAutoAligning = false;
-    let lastAlignedSection = null;
-    let previousScrollY = window.scrollY;
-    let scrollCheckAnimationFrame = null;
-    let userHasStartedScrolling = false;
-
-    function finishAutoAlign(section) {
-        lastAlignedSection = section;
-
-        window.setTimeout(function () {
-            previousScrollY = window.scrollY;
-            isAutoAligning = false;
-        }, 850);
-    }
-
-    function alignSectionToTop(section) {
-        if (!section || isAutoAligning || section === lastAlignedSection) {
-            return;
-        }
-
-        isAutoAligning = true;
-
-        section.scrollIntoView({
-            behavior: "smooth",
-            block: "start"
-        });
-
-        finishAutoAlign(section);
-    }
-
-    function sectionHasEnteredFivePercentFromBottom(section) {
-        const rectangle = section.getBoundingClientRect();
-        const fivePercentEnteredLine = window.innerHeight * 0.99;
-
-        return rectangle.top > 0 && rectangle.top <= fivePercentEnteredLine;
-    }
-
-    function sectionHasEnteredFivePercentFromTop(section) {
-        const rectangle = section.getBoundingClientRect();
-        const fivePercentVisibleLine = window.innerHeight * 0.01;
-
-        return rectangle.top < 0 && rectangle.bottom >= fivePercentVisibleLine;
-    }
-
-    function checkSectionAlignment() {
-        scrollCheckAnimationFrame = null;
-
-        if (isAutoAligning || !userHasStartedScrolling) {
-            return;
-        }
-
-        const currentScrollY = window.scrollY;
-        const scrollingDown = currentScrollY > previousScrollY;
-        const scrollingUp = currentScrollY < previousScrollY;
-        previousScrollY = currentScrollY;
-
-        if (scrollingDown) {
-            for (let index = 1; index < sections.length; index += 1) {
-                const section = sections[index];
-
-                if (sectionHasEnteredFivePercentFromBottom(section)) {
-                    alignSectionToTop(section);
-                    break;
-                }
-            }
-        }
-
-        if (scrollingUp) {
-            for (let index = sections.length - 2; index >= 0; index -= 1) {
-                const section = sections[index];
-
-                if (sectionHasEnteredFivePercentFromTop(section)) {
-                    alignSectionToTop(section);
-                    break;
-                }
-            }
-        }
-    }
-
-    function requestSectionAlignmentCheck() {
-        if (scrollCheckAnimationFrame) {
-            return;
-        }
-
-        scrollCheckAnimationFrame = window.requestAnimationFrame(checkSectionAlignment);
-    }
-
-    ["wheel", "touchmove", "keydown"].forEach(function (eventName) {
-        window.addEventListener(eventName, function () {
-            userHasStartedScrolling = true;
-            previousScrollY = window.scrollY;
-        }, { passive: true });
-    });
-
-    window.addEventListener("scroll", requestSectionAlignmentCheck, { passive: true });
 }
 
 function getAnimationPath() {
@@ -383,18 +252,19 @@ function setupOrganizerCards() {
 }
 
 function setupRevealGroups() {
-    const groups = Array.from(document.querySelectorAll("[data-reveal-group]"));
+    const groups = Array.from(document.querySelectorAll("[data-reveal-group], .reveal-grid, .topic-reveal-grid, .cooperation-reveal-grid"));
 
     if (groups.length === 0) {
         return;
     }
 
     function closeGroup(group) {
-        const cards = Array.from(group.querySelectorAll(".reveal-card"));
+        const cards = Array.from(group.querySelectorAll(":scope > .reveal-card"));
         group.classList.remove("has-active");
 
         cards.forEach(function (card) {
             card.classList.remove("is-active");
+            card.classList.remove("is-dimmed");
 
             const trigger = card.querySelector(".reveal-trigger");
 
@@ -404,32 +274,62 @@ function setupRevealGroups() {
         });
     }
 
+    function toggleCard(group, card) {
+        const trigger = card.querySelector(".reveal-trigger");
+        const wasActive = card.classList.contains("is-active");
+
+        closeGroup(group);
+
+        if (!wasActive) {
+            group.classList.add("has-active");
+            card.classList.add("is-active");
+
+            if (trigger) {
+                trigger.setAttribute("aria-expanded", "true");
+            }
+        }
+
+        Array.from(group.querySelectorAll(":scope > .reveal-card")).forEach(function (item) {
+            item.classList.toggle("is-dimmed", group.classList.contains("has-active") && item !== card && card.classList.contains("is-active"));
+        });
+    }
+
     groups.forEach(function (group) {
-        if (group.dataset.initialized === "true") {
+        if (group.dataset.revealInitialized === "true") {
             return;
         }
 
-        group.dataset.initialized = "true";
-        const cards = Array.from(group.querySelectorAll(".reveal-card"));
+        const cards = Array.from(group.querySelectorAll(":scope > .reveal-card"));
+
+        if (cards.length === 0) {
+            return;
+        }
+
+        group.dataset.revealInitialized = "true";
 
         cards.forEach(function (card) {
             const trigger = card.querySelector(".reveal-trigger");
 
-            if (!trigger) {
-                return;
+            if (trigger) {
+                trigger.addEventListener("click", function (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    toggleCard(group, card);
+                });
             }
 
-            trigger.addEventListener("click", function (event) {
-                event.stopPropagation();
-
-                const wasActive = card.classList.contains("is-active");
-                closeGroup(group);
-
-                if (!wasActive) {
-                    group.classList.add("has-active");
-                    card.classList.add("is-active");
-                    trigger.setAttribute("aria-expanded", "true");
+            card.addEventListener("click", function (event) {
+                if (event.target.closest("a")) {
+                    return;
                 }
+
+                if (trigger && trigger.contains(event.target)) {
+                    return;
+                }
+
+                event.preventDefault();
+                event.stopPropagation();
+                toggleCard(group, card);
             });
         });
 
@@ -592,18 +492,59 @@ function setupEditionGallery() {
     startAutoplay();
 }
 
-window.addEventListener("scroll", updateActiveNavigation, { passive: true });
+function runWhenDocumentReady(callback) {
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", callback, { once: true });
+        return;
+    }
 
-window.addEventListener("load", function () {
+    callback();
+}
+
+function runWhenIdle(callback, timeout) {
+    if ("requestIdleCallback" in window) {
+        window.requestIdleCallback(callback, { timeout: timeout || 1500 });
+        return;
+    }
+
+    window.setTimeout(callback, Math.min(timeout || 700, 1200));
+}
+
+function shouldLoadDecorativeLottie() {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+
+    if (reducedMotion) {
+        return false;
+    }
+
+    if (connection && (connection.saveData || /2g/.test(connection.effectiveType || ""))) {
+        return false;
+    }
+
+    return true;
+}
+
+function setupLazyDecorativeLottie() {
+    if (!shouldLoadDecorativeLottie()) {
+        return;
+    }
+
+    runWhenIdle(function () {
+        loadLottieScript(loadMovingFixedLottieBackground);
+    }, 1800);
+}
+
+function initializePageInteractions() {
     setupReturnToHomeLinks();
-    setupSmoothSectionLinks();
-
-    setupFivePercentSectionAutoAlign();
     setupRevealGroups();
     setupOrganizerCards();
     setupEditionGallery();
     updateActiveNavigation();
-    loadLottieScript(loadMovingFixedLottieBackground);
-});
+}
 
+window.addEventListener("scroll", updateActiveNavigation, { passive: true });
 window.addEventListener("resize", updateActiveNavigation);
+
+runWhenDocumentReady(initializePageInteractions);
+window.addEventListener("load", setupLazyDecorativeLottie, { once: true });
